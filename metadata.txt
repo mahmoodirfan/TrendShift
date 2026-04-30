@@ -1,0 +1,20 @@
+[general]
+name=TrendShift
+qgisMinimumVersion=3.16
+description=Pixel-wise abrupt change point detection for raster time series using Pettitt's non-parametric test
+version=1.1
+author=Irfan Mahmood
+email=irfan-mahmood@outlook.com
+about=TrendShift detects abrupt temporal shifts in time-ordered raster stacks. It estimates the most likely change point per pixel using Pettitt's non-parametric change point test and exports change step, change time, magnitude, direction, p-value, significance mask, and test statistic rasters. Designed for NDVI shifts, rangeland stress, forest disturbance, land-cover transitions represented as continuous indices, precipitation/temperature anomalies, water extent metrics, and other environmental raster time-series workflows.
+tracker=https://github.com/mahmoodirfan/TrendShift/issues
+repository=https://github.com/mahmoodirfan/TrendShift
+tags=raster,change point,breakpoint,temporal analysis,time series,remote sensing,NDVI,disturbance,environmental monitoring,Pettitt
+homepage=https://github.com/mahmoodirfan/TrendShift
+category=Raster
+icon=icons/icon.png
+experimental=False
+deprecated=False
+server=False
+hasProcessingProvider=True
+
+changelog=Version 1.1: clean repository-ready release; supports 2+ rasters, minimum segment length default 1, automatic segment-length adjustment for short stacks, raster alignment validation, Pettitt change point outputs, and updated documentation.

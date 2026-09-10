@@ -1,178 +1,68 @@
-# TrendShift – Raster Change Point Detection for QGIS
+# TrendShift
+### Locate the strongest abrupt shift.
 
-[![QGIS](https://img.shields.io/badge/QGIS-3.16%2B-green)](https://qgis.org)
-[![License](https://img.shields.io/badge/License-GPL--2.0-blue)](LICENSE)
+A QGIS Processing plugin that applies Pettitt’s non-parametric change-point test to time-ordered raster stacks and maps the timing, magnitude and direction of a candidate shift.
 
-**TrendShift** is a QGIS Processing plugin for pixel-wise abrupt change point detection in raster time-series stacks. It uses **Pettitt's non-parametric change point test** to estimate where each pixel experienced its strongest temporal shift.
+**QGIS 3.16+ declared in plugin metadata** · Python · QGIS Processing
 
-TrendShift is designed as a companion to **RasterTrend**:
+[Detailed guide](docs/guide.md) · [Report a problem](https://github.com/mahmoodirfan/TrendShift/issues) · [Contribute](CONTRIBUTING.md)
 
-- **RasterTrend** answers: *Is there a gradual monotonic trend?*
-- **TrendShift** answers: *When did the strongest abrupt shift happen?*
+## Start here
 
----
+1. Load aligned rasters in chronological order. The algorithm reads **band 1 of each layer**.
+2. Open **Processing Toolbox → TrendShift → Change Point Analysis → Raster Change Point Detection**.
+3. Set the minimum segment length, significance threshold, first time value and time interval.
+4. Choose a new output folder and run.
+5. Inspect change magnitude and p-value alongside the change-time map. A candidate split is not automatically evidence of a real disturbance.
 
-## Version 1.1
+## Install
 
-This is a clean QGIS/GitHub-ready release. It supports raster stacks with 2 or more layers, uses a default minimum segment length of 1 for exploratory short-stack testing, automatically adjusts infeasible segment-length settings, validates raster alignment before processing, and writes all outputs as compressed GeoTIFFs.
+In QGIS, open **Plugins → Manage and Install Plugins** and search for **TrendShift**. If a compatible listing is unavailable, install from this repository:
 
----
+1. Download and extract the source archive.
+2. Rename the extracted plugin directory to `TrendShift` (remove a branch suffix such as `-main`).
+3. In QGIS, open **Settings → User Profiles → Open Active Profile Folder**.
+4. Copy the directory into `python/plugins/`, creating those subfolders if needed. `metadata.txt` and `__init__.py` must sit directly inside `python/plugins/TrendShift/`.
+5. Restart QGIS and enable **TrendShift** in the plugin manager.
 
-## Key Features
+A GitHub source ZIP is not necessarily a correctly packaged QGIS install ZIP. Use the extracted-folder steps above for source downloads. Declared minimum versions are not a substitute for testing your QGIS build.
 
-- Pixel-wise abrupt change point detection from time-ordered raster stacks
-- Pettitt's non-parametric test; no normality assumption required
-- Change step and mapped change-time output
-- Change magnitude output: after-change mean minus before-change mean
-- Direction raster: decrease, no shift, increase
-- P-value and significance mask outputs
-- Before/after mean rasters for interpretation
-- Raster alignment validation before analysis
-- Integrated into the **QGIS Processing Toolbox**
-- Works in QGIS batch mode and Model Builder
+## What you get
 
----
-
-## Outputs
-
-| File | Description |
-|------|-------------|
-| `change_step.tif` | First post-change raster step using 1-based indexing |
-| `change_time.tif` | Time value of first post-change raster based on user-defined start value and interval |
+| Output | Meaning |
+| :--- | :--- |
+| `change_step.tif` | First post-change layer, indexed from 1 |
+| `change_time.tif` | First time value + (change step − 1) × interval |
 | `change_magnitude.tif` | After-change mean minus before-change mean |
-| `direction.tif` | -1 = decrease, 0 = no mean shift, +1 = increase |
-| `p_value.tif` | Approximate Pettitt test p-value |
-| `significance_mask.tif` | 1 = significant shift, 0 = not significant |
+| `direction.tif` | −1 decrease, 0 no mean shift, +1 increase |
+| `p_value.tif`, `significance_mask.tif` | Approximate p-value and thresholded mask |
 | `pettitt_k.tif` | Pettitt K statistic |
-| `before_mean.tif` | Mean before detected change point |
-| `after_mean.tif` | Mean after detected change point |
-| `trendshift_report.txt` | Plain-text processing report and interpretation notes |
+| `before_mean.tif`, `after_mean.tif` | Means on either side of the candidate split |
+| `trendshift_report.txt` | Processing settings and interpretation notes |
 
----
+## Before interpreting results
 
-## Installation
+- Use the same CRS, extent, dimensions and pixel alignment across rasters. TrendShift validates alignment before analysis.
+- Two layers are accepted, but very short stacks are exploratory rather than strong statistical evidence.
+- An infeasible minimum segment length is reduced automatically; read the Processing log.
+- Pixels with a missing or non-finite observation are excluded.
+- One dominant change point is estimated per pixel. This is not a multiple-breakpoint model or a causal attribution method.
+- P-values are approximate; temporal dependence and spatial multiple testing need separate consideration.
+- The stack is loaded into memory. Start with a small area.
 
-### Manual Installation
+## Documentation & support
 
-1. Download the plugin zip file.
-2. Open QGIS.
-3. Go to **Plugins → Manage and Install Plugins → Install from ZIP**.
-4. Select `TrendShift.zip`.
-5. Enable **TrendShift** from the installed plugins list.
+The [detailed guide](docs/guide.md) contains extended settings, interpretation examples and workflow notes.
 
-### Developer Installation
+For a bug report, include your QGIS version, operating system, plugin version, parameters, Processing log and a small shareable example. See [contribution guidance](CONTRIBUTING.md).
 
-Copy the `TrendShift` folder to your QGIS plugin directory:
+## Related tools
 
-- **Windows:** `C:\Users\<user>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\`
-- **Linux/Mac:** `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
+[RasterTrend](https://github.com/mahmoodirfan/RasterTrend) · [TrendShift](https://github.com/mahmoodirfan/TrendShift) · [OpenGeoEnrich](https://github.com/mahmoodirfan/OpenGeoEnrich) · [spatialdrought](https://github.com/mahmoodirfan/spatialdrought)
 
-Restart QGIS and enable the plugin.
+## Author & license
 
----
+**[Irfan Mahmood](https://github.com/mahmoodirfan)** · Remote Sensing & GIS Specialist  
+[Email](mailto:irfan-mahmood@outlook.com) · [License](LICENSE)
 
-## Usage
-
-1. Open **Processing Toolbox**.
-2. Navigate to **TrendShift → Change Point Analysis → Raster Change Point Detection**.
-3. Select input raster layers in chronological order.
-4. Set:
-   - **Minimum segment length**: minimum number of rasters before and after the change point.
-   - **Significance threshold**: usually `0.05`.
-   - **Time value of first raster**: e.g. `2001` for annual rasters starting in 2001.
-   - **Time interval**: e.g. `1` for annual rasters, `0.083333` for monthly rasters represented in decimal years.
-   - **Output folder**.
-5. Click **Run**.
-
----
-
-## Interpretation Example
-
-Suppose the input rasters represent annual NDVI from 2001 to 2024.
-
-- Set **Time value of first raster** = `2001`
-- Set **Time interval** = `1`
-
-If a pixel has:
-
-- `change_step = 12`
-- `change_time = 2012`
-- `change_magnitude = -0.18`
-- `direction = -1`
-- `p_value = 0.02`
-
-This means the strongest detected shift occurs at the first post-change layer corresponding to **2012**, the post-change mean is **0.18 NDVI units lower** than the pre-change mean, and the shift is statistically significant at p ≤ 0.05.
-
----
-
-## Input Requirements
-
-- All rasters must have the same:
-  - CRS
-  - extent
-  - pixel size
-  - rows and columns
-  - grid alignment
-- Input layers must be ordered chronologically.
-- At least 2 rasters are allowed.
-- Very short stacks (2–4 rasters) can run, but outputs should be treated as exploratory change indicators rather than strong statistical evidence.
-- If the selected minimum segment length is too high for the number of rasters, TrendShift automatically reduces it to the maximum feasible value and reports this in the log.
-- The method is intended for continuous or ordinal raster time series such as NDVI, precipitation, temperature, LST, water indices, or productivity metrics.
-- For categorical land-cover class transitions, use a transition matrix or classified raster change workflow instead.
-
----
-
-## Statistical Method
-
-TrendShift uses **Pettitt's test**, a rank-based, non-parametric test for detecting a single abrupt change point in a time series. The method identifies the time step where the difference between the distributions before and after the split is strongest.
-
-The plugin reports the candidate split with the largest absolute Pettitt statistic and estimates an approximate p-value.
-
----
-
-## Example Applications
-
-- NDVI disturbance year mapping
-- Rangeland productivity shift detection
-- Forest disturbance and recovery timing
-- Vegetation collapse after drought
-- Rainfall or temperature regime shift analysis
-- Surface water index shift mapping
-- Land surface temperature shift detection
-- Environmental monitoring and early warning products
-
----
-
-## Limitations
-
-- Detects one dominant change point per pixel.
-- Does not model multiple breakpoints in the same time series.
-- Loads the raster stack into memory; very large stacks may require tiling in future versions.
-- P-values are approximate and should be interpreted with domain knowledge.
-- The plugin does not automatically correct for spatial multiple testing.
-
----
-
-## Citation
-
-If you use TrendShift in research or operational work, please cite:
-
-```text
-Mahmood, I. (2026). TrendShift: A QGIS Plugin for Pixel-wise Change Point Detection in Raster Time Series.
-GitHub: https://github.com/mahmoodirfan/TrendShift
-```
-
----
-
-## Author
-
-**Irfan Mahmood**  
-Remote Sensing & GIS Specialist  
-Email: irfan-mahmood@outlook.com  
-GitHub: https://github.com/mahmoodirfan
-
----
-
-## License
-
-GNU General Public License v2.0 — see [LICENSE](LICENSE)
+For research use, cite the repository and record the version or commit you used. Existing citation details are retained in the detailed guide where provided.
